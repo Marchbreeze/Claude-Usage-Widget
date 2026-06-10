@@ -7,6 +7,10 @@ let package = Package(
     targets: [
         .target(name: "UsageCore"),
         .executableTarget(name: "ClaudeUsageWidget", dependencies: ["UsageCore"]),
-        .testTarget(name: "UsageCoreTests", dependencies: ["UsageCore"]),
+        .testTarget(
+            name: "UsageCoreTests",
+            dependencies: ["UsageCore"],
+            resources: [.copy("Fixtures")]
+        ),
     ]
 )
