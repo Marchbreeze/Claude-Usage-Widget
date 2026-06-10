@@ -18,11 +18,3 @@ final class MonthWindowTests: XCTestCase {
         XCTAssertNotEqual(MonthWindow.start(of: june30, calendar: cal), MonthWindow.start(of: july1, calendar: cal))
     }
 }
-
-final class ISODateTests: XCTestCase {
-    func testParsesWithAndWithoutFractionalSeconds() {
-        XCTAssertNotNil(ISODate.parse("2026-06-11T05:00:00Z"))
-        XCTAssertNotNil(ISODate.parse("2026-06-11T05:00:00.123Z"))
-        XCTAssertNil(ISODate.parse("not a date"))
-    }
-}

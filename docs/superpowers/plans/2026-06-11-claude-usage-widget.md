@@ -297,7 +297,7 @@ git commit -m "feat(core): month window and tolerant ISO8601 parsing"
 
 **Files:** Create `.github/workflows/ci.yml`
 
-- [ ] **Step 1:** Create public GitHub repo `Claude-Usage-Widget` via GitHub MCP `create_repository`.
+- [ ] **Step 1:** Create **private** GitHub repo `Claude-Usage-Widget` via GitHub MCP `create_repository` (user decision 2026-06-11; Releases downloadable by the account owner/collaborators only). Actions-run polling needs authenticated access — use GitHub MCP instead of unauthenticated web_fetch where possible.
 - [ ] **Step 2:** Write `.github/workflows/ci.yml`:
 
 ```yaml
