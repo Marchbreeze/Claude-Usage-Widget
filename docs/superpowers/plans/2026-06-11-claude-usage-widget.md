@@ -37,7 +37,7 @@ Sources/ClaudeUsageWidget/SettingsWindow.swift
 Tests/UsageCoreTests/…Tests.swift (one per UsageCore file)
 Tests/UsageCoreTests/Fixtures/*.json
 Resources/Info.plist
-assets/AppIcon.png
+assets/AppIcon.png.b64
 scripts/make_app.sh
 .github/workflows/ci.yml
 README.md
@@ -1343,7 +1343,7 @@ Already created in Chunk 1 Task 5 (moved earlier so every chunk gets a CI gate).
 
 **Files:** Create `README.md` (Korean)
 
-- [ ] **Step 1:** Write README covering: what it is (한 줄 + 메뉴바 스크린샷 자리), 다운로드 (Releases에서 zip → Applications로 이동), 무서명 앱 첫 실행 (`우클릭 → 열기`, 또는 `xattr -cr /Applications/ClaudeUsageWidget.app`), 구독 모드 요구사항 (Claude Code 설치+로그인, 최초 실행 시 키체인 접근 허용 → "항상 허용" 권장), API 모드 설정 (Admin API 키 발급 위치, 월 예산 기본 $200), 색상 의미 (주황=정상, 빨강=80% 초과, 회색=데이터 없음), 직접 빌드 (`./scripts/make_app.sh`), 라이선스 MIT.
+- [ ] **Step 1:** Write README covering: what it is (한 줄 + 메뉴바 스크린샷 자리), 다운로드 (Releases에서 zip → Applications로 이동), 무서명 앱 첫 실행 (`우클릭 → 열기`, 또는 `xattr -cr /Applications/ClaudeUsageWidget.app`), 구독 모드 요구사항 (Claude Code 설치+로그인, 최초 실행 시 키체인 접근 허용 → "항상 허용" 권장), API 모드 설정 (Admin API 키 발급 위치, 월 예산 기본 $200), 색상 의미 (주황=정상, 빨강=80% 초과, 회색=데이터 없음), 직접 빌드 (`bash scripts/make_app.sh`), 라이선스 MIT.
 - [ ] **Step 2:** Create `LICENSE` (MIT, copyright 2026 sangho).
 - [ ] **Step 3: Commit**
 
