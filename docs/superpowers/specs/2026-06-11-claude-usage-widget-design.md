@@ -42,12 +42,14 @@ The exact JSON schema of `/api/oauth/usage` is undocumented; the parser is writt
 
 ## Data flow
 
-Timer → active `UsageProvider.fetch()` → `UsageSnapshot` → `StatusItemController` updates SwiftUI state → menu bar redraws. Last good snapshot is kept in memory and on disk (`Application Support/ClaudeUsageWidget/last-snapshot.json`) so a value shows immediately on relaunch.
+Timer → active `UsageProvider.fetch()` → `UsageSnapshot` → `StatusItemController` updates SwiftUI state → menu bar redraws. Last good snapshot is kept in memory and on disk (`Application Support/ClaudeUsageWidget/last-snapshot.json`) so a value shows immediately on relaunch; a restored snapshot is marked stale ("마지막 갱신 N분 전") until the first successful fetch. Reset countdowns are computed at menu-open time from the stored reset timestamps.
 
 ## Error handling
 
 - No Keychain credentials / expired token (subscription mode): gray icon + `—`; dropdown row: "Claude Code 로그인이 필요합니다 (`claude` 실행)".
-- No Admin key (API mode): gray `—`; dropdown prompts to open Settings.
+- No Admin key (API mode): gray `—`; dropdown prompts to open Settings. Invalid key (HTTP 401/403): gray `—` with "API 키가 올바르지 않습니다" row (distinct from missing key).
+- Budget ≤ 0: treated as unset → gray `—`, prompt to open Settings (guarded in `PercentMath`, unit-tested).
+- Month rollover: the query window is recomputed on every fetch, so spend resets to $0 at the start of each calendar month (local time).
 - Network failure / HTTP 429 / 5xx: keep showing last good value, mark dropdown with "마지막 갱신 N분 전"; exponential backoff (max 15 min) on repeated failures.
 - Malformed response: treated as fetch failure (above), never crash.
 
