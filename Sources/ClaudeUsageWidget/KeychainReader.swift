@@ -25,6 +25,8 @@ enum KeychainReader {
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
             kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleWhenUnlockedThisDeviceOnly,
+            kSecAttrSynchronizable as String: false,
         ]
         SecItemAdd(attrs as CFDictionary, nil)
     }

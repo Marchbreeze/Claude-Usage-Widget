@@ -63,6 +63,12 @@ Anthropic Admin API 키를 사용해 **이번 달 API 지출**을 예산 대비 
 4. 월 예산(USD)을 입력합니다 (기본값: $200).
 5. **저장** 버튼을 누릅니다.
 
+**보안**
+
+- 키는 이 Mac의 키체인에만 저장됩니다 (기기 전용, iCloud 동기화 안 됨, 잠금 해제 상태에서만 접근).
+- 키는 `api.anthropic.com` 외에는 어디로도 전송되지 않으며, 저장 후 화면에 다시 표시되지 않습니다.
+- 설정에서 **키 삭제** 버튼으로 언제든 제거할 수 있고, [Anthropic Console](https://console.anthropic.com/settings/admin-keys)에서 키 자체를 폐기할 수도 있습니다.
+
 ---
 
 ## 색상 의미
