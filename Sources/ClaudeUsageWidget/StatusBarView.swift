@@ -25,7 +25,7 @@ struct StatusBarView: View {
                         .frame(width: geo.size.width * CGFloat((model.percent ?? 0) / 100))
                 }
             }
-            .frame(width: 36, height: 6)
+            .frame(width: 48, height: 6)
             Text(model.percent.map { "\(Int($0.rounded()))%" } ?? "—")
                 .font(.system(size: 12, weight: .semibold).monospacedDigit())
                 .foregroundColor(color)
