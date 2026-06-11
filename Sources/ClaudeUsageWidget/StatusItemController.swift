@@ -33,10 +33,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     func restartPolling() {
         pollTask?.cancel()
         consecutiveFailures = 0
+        provider = Self.makeProvider(for: settings)
         startPolling()
     }
 
-    private var provider: UsageProvider {
+    private lazy var provider: UsageProvider = Self.makeProvider(for: settings)
+
+    private static func makeProvider(for settings: SettingsStore) -> UsageProvider {
         settings.mode == .subscription ? SubscriptionProvider() : APICostProvider(settings: settings)
     }
 
