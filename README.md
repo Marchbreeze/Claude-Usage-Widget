@@ -3,7 +3,9 @@
 macOS 메뉴바에서 Claude 사용량을 실시간으로 확인하는 경량 앱입니다.  
 아이콘 + 진행 막대 + 퍼센트로 한눈에 현황을 파악할 수 있습니다.
 
-<!-- 스크린샷 자리 -->
+| 정상 (80% 이하) | 경고 (80% 초과) |
+|:---:|:---:|
+| ![normal](assets/screenshot-normal.png) | ![warning](assets/screenshot-warning.png) |
 
 ---
 
