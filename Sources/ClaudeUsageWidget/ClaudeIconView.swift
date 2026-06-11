@@ -3,55 +3,35 @@ import SwiftUI
 struct ClaudeIconView: View {
     let color: Color
 
+    private static let solidRects: [CGRect] = [
+        CGRect(x: 0.14, y: 0.18, width: 0.72, height: 0.48),
+        CGRect(x: 0.00, y: 0.43, width: 0.14, height: 0.10),
+        CGRect(x: 0.86, y: 0.43, width: 0.14, height: 0.10),
+        CGRect(x: 0.208, y: 0.66, width: 0.13, height: 0.10),
+        CGRect(x: 0.637, y: 0.66, width: 0.13, height: 0.10),
+    ]
+
+    private static let eyeRects: [CGRect] = [
+        CGRect(x: 0.248, y: 0.31, width: 0.05, height: 0.13),
+        CGRect(x: 0.67, y: 0.31, width: 0.05, height: 0.13),
+    ]
+
     var body: some View {
         Canvas { context, size in
-            let w = size.width
-            let h = size.height
             var path = Path()
-
-            let bodyLeft = 0.08 * w
-            let bodyRight = 0.92 * w
-            let domeCenterY = 0.52 * h
-            let footTopY = 0.82 * h
-            let radius = (bodyRight - bodyLeft) / 2
-
-            path.move(to: CGPoint(x: bodyLeft, y: domeCenterY))
-            path.addArc(
-                center: CGPoint(x: 0.5 * w, y: domeCenterY),
-                radius: radius,
-                startAngle: .degrees(180),
-                endAngle: .degrees(0),
-                clockwise: false
-            )
-            path.addLine(to: CGPoint(x: bodyRight, y: footTopY))
-
-            let legCount = 4
-            let legWidth = (bodyRight - bodyLeft) / CGFloat(legCount)
-            for i in 0..<legCount {
-                let centerX = bodyRight - (CGFloat(i) + 0.5) * legWidth
-                path.addArc(
-                    center: CGPoint(x: centerX, y: footTopY),
-                    radius: legWidth / 2,
-                    startAngle: .degrees(0),
-                    endAngle: .degrees(180),
-                    clockwise: false
-                )
-            }
-
-            path.closeSubpath()
-
-            let eyeRadius = 0.07 * w
-            for eyeX in [0.34 * w, 0.66 * w] {
-                path.addEllipse(in: CGRect(
-                    x: eyeX - eyeRadius,
-                    y: 0.48 * h - eyeRadius,
-                    width: eyeRadius * 2,
-                    height: eyeRadius * 2
-                ))
-            }
-
+            for rect in Self.solidRects { path.addRect(scaled(rect, in: size)) }
+            for rect in Self.eyeRects { path.addRect(scaled(rect, in: size)) }
             context.fill(path, with: .color(color), style: FillStyle(eoFill: true))
         }
         .accessibilityLabel("Claude usage")
+    }
+
+    private func scaled(_ rect: CGRect, in size: CGSize) -> CGRect {
+        CGRect(
+            x: rect.minX * size.width,
+            y: rect.minY * size.height,
+            width: rect.width * size.width,
+            height: rect.height * size.height
+        )
     }
 }
