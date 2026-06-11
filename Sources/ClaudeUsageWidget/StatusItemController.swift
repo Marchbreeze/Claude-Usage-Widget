@@ -21,11 +21,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let restored = SnapshotCache.load()
         snapshot = restored
         hosting = NSHostingView(rootView: StatusBarView(model: StatusBarModel(percent: restored?.percent, isStale: restored != nil)))
-        hosting.frame = NSRect(x: 0, y: 0, width: 86, height: 22)
         super.init()
         statusItem.button?.addSubview(hosting)
-        statusItem.button?.frame = hosting.frame
-        statusItem.length = hosting.frame.width
+        resizeToFit()
         menu.autoenablesItems = false
         menu.delegate = self
         statusItem.menu = menu
@@ -57,17 +55,21 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func tick() async {
+        let activeMode = settings.mode
         do {
             let snap = try await provider.fetch()
+            guard settings.mode == activeMode else { return }
             snapshot = snap
             lastError = nil
             consecutiveFailures = 0
             SnapshotCache.save(snap)
             render(percent: snap.percent, isStale: false)
         } catch {
-            lastError = error as? FetchError ?? .network("\(error)")
+            guard settings.mode == activeMode else { return }
+            let fetchError = error as? FetchError ?? .network("\(error)")
+            lastError = fetchError
             consecutiveFailures += 1
-            switch lastError! {
+            switch fetchError {
             case .network:
                 render(percent: snapshot?.percent, isStale: true)
             default:
@@ -78,6 +80,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private func render(percent: Double?, isStale: Bool) {
         hosting.rootView = StatusBarView(model: StatusBarModel(percent: percent, isStale: isStale))
+        resizeToFit()
+    }
+
+    private func resizeToFit() {
+        let size = hosting.fittingSize
+        hosting.frame = NSRect(x: 0, y: 0, width: size.width, height: max(size.height, 22))
+        statusItem.length = size.width
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
