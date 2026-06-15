@@ -20,7 +20,8 @@ final class SubscriptionProvider: UsageProvider {
         }
         guard http.statusCode == 200 else { throw FetchError.network("HTTP \(http.statusCode)") }
         guard let detail = try? OAuthUsageParser.parse(data) else { throw FetchError.network("응답 형식 오류") }
-        return UsageSnapshot(source: .subscription, percent: detail.fiveHourPercent,
+        let percent = detail.fiveHourPercent ?? detail.extraUsage?.percent ?? 0
+        return UsageSnapshot(source: .subscription, percent: percent,
                              subscription: detail, api: nil, fetchedAt: Date())
     }
 

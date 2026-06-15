@@ -1,15 +1,28 @@
 import Foundation
 
+public struct ExtraUsage: Codable, Equatable {
+    public let percent: Double
+    public let usedUSD: Double?
+    public let limitUSD: Double?
+    public init(percent: Double, usedUSD: Double?, limitUSD: Double?) {
+        self.percent = percent
+        self.usedUSD = usedUSD
+        self.limitUSD = limitUSD
+    }
+}
+
 public struct SubscriptionDetail: Codable, Equatable {
-    public let fiveHourPercent: Double
+    public let fiveHourPercent: Double?
     public let fiveHourResetsAt: Date?
     public let sevenDayPercent: Double?
     public let sevenDayResetsAt: Date?
-    public init(fiveHourPercent: Double, fiveHourResetsAt: Date?, sevenDayPercent: Double?, sevenDayResetsAt: Date?) {
+    public let extraUsage: ExtraUsage?
+    public init(fiveHourPercent: Double?, fiveHourResetsAt: Date?, sevenDayPercent: Double?, sevenDayResetsAt: Date?, extraUsage: ExtraUsage? = nil) {
         self.fiveHourPercent = fiveHourPercent
         self.fiveHourResetsAt = fiveHourResetsAt
         self.sevenDayPercent = sevenDayPercent
         self.sevenDayResetsAt = sevenDayResetsAt
+        self.extraUsage = extraUsage
     }
 }
 

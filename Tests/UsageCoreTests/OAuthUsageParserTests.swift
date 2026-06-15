@@ -20,4 +20,26 @@ final class OAuthUsageParserTests: XCTestCase {
     func testGarbageThrows() {
         XCTAssertThrowsError(try OAuthUsageParser.parse(Data("[]".utf8)))
     }
+
+    func testSubscriptionAccountWithExtraUsageDisabled() throws {
+        let d = try OAuthUsageParser.parse(try fixture("oauth_usage_subscription"))
+        XCTAssertEqual(d.fiveHourPercent, 0)
+        XCTAssertEqual(d.sevenDayPercent, 9)
+        XCTAssertNil(d.extraUsage) // is_enabled == false
+    }
+
+    func testEnterpriseAccountFallsBackToExtraUsage() throws {
+        let d = try OAuthUsageParser.parse(try fixture("oauth_usage_enterprise"))
+        XCTAssertNil(d.fiveHourPercent)        // five_hour is null
+        XCTAssertNil(d.sevenDayPercent)        // seven_day is null
+        let extra = try XCTUnwrap(d.extraUsage)
+        XCTAssertEqual(extra.percent, 100)     // 20026/20000 clamped to 100
+        XCTAssertEqual(extra.usedUSD, 20026)
+        XCTAssertEqual(extra.limitUSD, 20000)
+    }
+
+    func testAllNullWindowsAndNoExtraUsageThrows() {
+        let json = #"{"five_hour": null, "seven_day": null, "extra_usage": {"is_enabled": false}}"#
+        XCTAssertThrowsError(try OAuthUsageParser.parse(Data(json.utf8)))
+    }
 }

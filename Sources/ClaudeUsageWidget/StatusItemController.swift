@@ -97,9 +97,18 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.autoenablesItems = false
         if let snap = snapshot {
             if let sub = snap.subscription {
-                menu.addItem(label: "5시간 세션: \(Int(sub.fiveHourPercent.rounded()))% 사용" + countdown(sub.fiveHourResetsAt))
+                if let five = sub.fiveHourPercent {
+                    menu.addItem(label: "5시간 세션: \(Int(five.rounded()))% 사용" + countdown(sub.fiveHourResetsAt))
+                }
                 if let weekly = sub.sevenDayPercent {
                     menu.addItem(label: "주간: \(Int(weekly.rounded()))% 사용" + countdown(sub.sevenDayResetsAt))
+                }
+                if let extra = sub.extraUsage {
+                    if let used = extra.usedUSD, let limit = extra.limitUSD {
+                        menu.addItem(label: String(format: "추가 사용량: $%.0f / $%.0f (%d%%)", used, limit, Int(extra.percent.rounded())))
+                    } else {
+                        menu.addItem(label: "추가 사용량: \(Int(extra.percent.rounded()))% 사용")
+                    }
                 }
             }
             if let api = snap.api {
