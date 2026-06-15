@@ -26,27 +26,13 @@ public struct SubscriptionDetail: Codable, Equatable {
     }
 }
 
-public struct APIDetail: Codable, Equatable {
-    public let spendUSD: Double
-    public let budgetUSD: Double
-    public init(spendUSD: Double, budgetUSD: Double) {
-        self.spendUSD = spendUSD
-        self.budgetUSD = budgetUSD
-    }
-}
-
 public struct UsageSnapshot: Codable, Equatable {
-    public enum Source: String, Codable { case subscription, api }
-    public let source: Source
     public let percent: Double
     public let subscription: SubscriptionDetail?
-    public let api: APIDetail?
     public let fetchedAt: Date
-    public init(source: Source, percent: Double, subscription: SubscriptionDetail?, api: APIDetail?, fetchedAt: Date) {
-        self.source = source
+    public init(percent: Double, subscription: SubscriptionDetail?, fetchedAt: Date) {
         self.percent = percent
         self.subscription = subscription
-        self.api = api
         self.fetchedAt = fetchedAt
     }
 }

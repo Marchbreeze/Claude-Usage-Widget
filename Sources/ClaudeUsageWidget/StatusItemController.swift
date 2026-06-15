@@ -33,15 +33,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     func restartPolling() {
         pollTask?.cancel()
         consecutiveFailures = 0
-        provider = Self.makeProvider(for: settings)
         startPolling()
     }
 
-    private lazy var provider: UsageProvider = Self.makeProvider(for: settings)
-
-    private static func makeProvider(for settings: SettingsStore) -> UsageProvider {
-        settings.mode == .subscription ? SubscriptionProvider() : APICostProvider(settings: settings)
-    }
+    private let provider: UsageProvider = SubscriptionProvider()
 
     private func startPolling() {
         pollTask = Task { [weak self] in
@@ -58,17 +53,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func tick() async {
-        let activeMode = settings.mode
         do {
             let snap = try await provider.fetch()
-            guard settings.mode == activeMode else { return }
             snapshot = snap
             lastError = nil
             consecutiveFailures = 0
             SnapshotCache.save(snap)
             render(percent: snap.percent, isStale: false)
         } catch {
-            guard settings.mode == activeMode else { return }
             let fetchError = error as? FetchError ?? .network("\(error)")
             lastError = fetchError
             consecutiveFailures += 1
@@ -110,9 +102,6 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                         menu.addItem(label: "추가 사용량: \(Int(extra.percent.rounded()))% 사용")
                     }
                 }
-            }
-            if let api = snap.api {
-                menu.addItem(label: String(format: "이번 달 지출: $%.2f / $%.0f", api.spendUSD, api.budgetUSD))
             }
             let age = Int(Date().timeIntervalSince(snap.fetchedAt) / 60)
             if age >= 2 || lastError != nil {

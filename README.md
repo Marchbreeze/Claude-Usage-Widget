@@ -41,9 +41,10 @@ open /Applications/ClaudeUsageWidget.app
 
 ---
 
-## 구독 모드 (기본값)
+## 사용 방법
 
-Claude Code의 OAuth 세션을 읽어 **5시간 세션 사용률**을 표시합니다.
+Claude Code의 OAuth 세션을 읽어 **5시간 세션 사용률**을 표시합니다.  
+엔터프라이즈 계정처럼 세션 한도가 없는 경우에는 **추가 사용량(extra usage)** 을 예산 대비 퍼센트로 표시합니다.
 
 **요구사항**
 
@@ -51,25 +52,7 @@ Claude Code의 OAuth 세션을 읽어 **5시간 세션 사용률**을 표시합�
 - 최초 실행 시 키체인 접근 허용 다이얼로그가 표시됩니다.  
   **"항상 허용"** 을 선택하면 이후 매번 묻지 않습니다.
 
----
-
-## API 모드
-
-Anthropic Admin API 키를 사용해 **이번 달 API 지출**을 예산 대비 퍼센트로 표시합니다.
-
-**설정 방법**
-
-1. 메뉴바 아이콘 클릭 → **설정…**
-2. "표시할 사용량"을 **API (Admin 키)** 로 변경합니다.
-3. [Anthropic Console](https://console.anthropic.com/settings/admin-keys) 에서 Admin API 키를 발급한 뒤 입력합니다.
-4. 월 예산(USD)을 입력합니다 (기본값: $200).
-5. **저장** 버튼을 누릅니다.
-
-**보안**
-
-- 키는 이 Mac의 키체인에만 저장됩니다 (기기 전용, iCloud 동기화 안 됨, 잠금 해제 상태에서만 접근).
-- 키는 `api.anthropic.com` 외에는 어디로도 전송되지 않으며, 저장 후 화면에 다시 표시되지 않습니다.
-- 설정에서 **키 삭제** 버튼으로 언제든 제거할 수 있고, [Anthropic Console](https://console.anthropic.com/settings/admin-keys)에서 키 자체를 폐기할 수도 있습니다.
+별도의 API 키 입력이나 설정은 필요하지 않습니다. 로그인되어 있으면 자동으로 동작합니다.
 
 ---
 

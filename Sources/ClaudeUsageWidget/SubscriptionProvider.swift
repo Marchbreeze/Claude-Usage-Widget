@@ -21,8 +21,7 @@ final class SubscriptionProvider: UsageProvider {
         guard http.statusCode == 200 else { throw FetchError.network("HTTP \(http.statusCode)") }
         guard let detail = try? OAuthUsageParser.parse(data) else { throw FetchError.network("응답 형식 오류") }
         let percent = detail.fiveHourPercent ?? detail.extraUsage?.percent ?? 0
-        return UsageSnapshot(source: .subscription, percent: percent,
-                             subscription: detail, api: nil, fetchedAt: Date())
+        return UsageSnapshot(percent: percent, subscription: detail, fetchedAt: Date())
     }
 
     private func loadCredentials() throws -> ClaudeCredentials {
