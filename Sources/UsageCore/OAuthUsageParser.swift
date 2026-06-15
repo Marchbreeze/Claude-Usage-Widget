@@ -31,7 +31,11 @@ public enum OAuthUsageParser {
         if let used, let limit { percent = PercentMath.budgetPercent(spend: used, budget: limit) }
         else { percent = doubleValue(dict["utilization"]).map(PercentMath.clamp) }
         guard let percent else { return nil }
-        return ExtraUsage(percent: percent, usedUSD: used, limitUSD: limit)
+        // Extra usage resets on the monthly billing cycle. Prefer a server-provided
+        // resets_at; otherwise fall back to the start of the next calendar month (UTC).
+        let resets = (dict["resets_at"] as? String).flatMap(ISODate.parse)
+            ?? MonthlyReset.startOfNextMonthUTC()
+        return ExtraUsage(percent: percent, usedUSD: used, limitUSD: limit, resetsAt: resets)
     }
 
     private static func window(_ value: Any?) -> (Double, Date?)? {

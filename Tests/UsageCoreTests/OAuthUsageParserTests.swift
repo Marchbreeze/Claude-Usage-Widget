@@ -36,6 +36,9 @@ final class OAuthUsageParserTests: XCTestCase {
         XCTAssertEqual(extra.percent, 100)     // 20026/20000 clamped to 100
         XCTAssertEqual(extra.usedUSD, 20026)
         XCTAssertEqual(extra.limitUSD, 20000)
+        // No server resets_at -> falls back to start of next calendar month (future).
+        let reset = try XCTUnwrap(extra.resetsAt)
+        XCTAssertGreaterThan(reset, Date())
     }
 
     func testAllNullWindowsAndNoExtraUsageThrows() {

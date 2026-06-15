@@ -101,6 +101,11 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                     } else {
                         menu.addItem(label: "추가 사용량: \(Int(extra.percent.rounded()))% 사용")
                     }
+                    if let reset = extra.resetsAt {
+                        let when = MonthlyReset.monthDayUTC(reset)
+                        let remaining = RelativeTime.until(reset).map { " · \($0)" } ?? ""
+                        menu.addItem(label: "월 리셋: \(when)\(remaining)")
+                    }
                 }
             }
             let age = Int(Date().timeIntervalSince(snap.fetchedAt) / 60)
@@ -122,9 +127,8 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func countdown(_ date: Date?) -> String {
-        guard let date, date > Date() else { return "" }
-        let mins = Int(date.timeIntervalSinceNow / 60)
-        return mins >= 60 ? " · 리셋 \(mins / 60)시간 \(mins % 60)분 후" : " · 리셋 \(mins)분 후"
+        guard let date, let remaining = RelativeTime.until(date) else { return "" }
+        return " · 리셋 \(remaining)"
     }
 
     @objc private func refreshNow() { Task { await tick() } }

@@ -4,10 +4,12 @@ public struct ExtraUsage: Codable, Equatable {
     public let percent: Double
     public let usedUSD: Double?
     public let limitUSD: Double?
-    public init(percent: Double, usedUSD: Double?, limitUSD: Double?) {
+    public let resetsAt: Date?
+    public init(percent: Double, usedUSD: Double?, limitUSD: Double?, resetsAt: Date? = nil) {
         self.percent = percent
         self.usedUSD = usedUSD
         self.limitUSD = limitUSD
+        self.resetsAt = resetsAt
     }
 }
 
