@@ -1,5 +1,5 @@
 # Claude Usage Widget
-
+🙏
 macOS 메뉴바에서 Claude 사용량을 실시간으로 확인하는 경량 앱입니다.  
 아이콘 + 진행 막대 + 퍼센트로 한눈에 현황을 파악할 수 있습니다.
 
@@ -10,6 +10,8 @@ macOS 메뉴바에서 Claude 사용량을 실시간으로 확인하는 경량 �
 ---
 
 ## 다운로드
+
+> 깃허브 스타 한 번씩만 눌러주세요 🙏
 
 1. [Releases](https://github.com/Marchbreeze/Claude-Usage-Widget/releases) 페이지에서 최신 `ClaudeUsageWidget.zip`을 내려받습니다.
 2. 압축을 풀고 `ClaudeUsageWidget.app`을 `/Applications` 폴더로 이동합니다.
