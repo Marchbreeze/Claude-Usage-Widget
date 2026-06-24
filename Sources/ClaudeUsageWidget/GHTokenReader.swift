@@ -15,8 +15,30 @@ enum GHTokenReader {
     static func read() -> String? {
         if let env = environmentToken() { return env }
         if let copilot = copilotStoreToken() { return copilot }
+        if let copilotKey = copilotKeychainToken() { return copilotKey }
         if let file = hostsFileToken() { return file }
         if let key = keychainToken() { return key }
+        return nil
+    }
+
+    /// On macOS the Copilot CLI `/login` (device flow) token is stored in the
+    /// system keychain, not in a file. GitHub doesn't document the service name,
+    /// so try the likely candidates and pull a GitHub token out of whatever
+    /// string we get back (the item may be a JSON blob).
+    private static func copilotKeychainToken() -> String? {
+        // `copilot-cli` is what the CLI uses on macOS; the rest are fallbacks for
+        // other versions/platforms.
+        let candidates = [
+            "copilot-cli", "GitHub Copilot CLI", "GitHub Copilot",
+            "github-copilot", "copilot", "com.github.copilot",
+        ]
+        for service in candidates {
+            guard let data = try? KeychainReader.read(service: service),
+                  let raw = String(data: data, encoding: .utf8) else { continue }
+            if let token = extractGitHubToken(raw) { return token }
+            let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
         return nil
     }
 

@@ -64,7 +64,8 @@ Claude Code의 OAuth 세션을 읽어 **5시간 세션 사용률**을 표시합�
 **요구사항**
 
 - Copilot CLI에서 `/login`(device flow)으로 로그인되어 있어야 합니다. Claude와 마찬가지로 별도 설정 없이 자동으로 동작합니다.
-- 토큰은 Copilot CLI가 저장한 위치(`~/.copilot/settings.json` 등)에서 읽으며, `gh auth login`으로 로그인한 경우에는 `~/.config/gh/hosts.yml`도 자동으로 사용합니다.
+- macOS에서는 Copilot CLI가 로그인 토큰을 키체인 항목(`copilot-cli`)에 저장하며, 이 앱이 그 토큰을 읽습니다. Claude와 동일하게, 다른 앱이 만든 키체인 항목에 접근하므로 최초 1회 접근 허용 창이 뜹니다. **"항상 허용"** 을 누르면 이후에는 묻지 않습니다.
+- `gh auth login`으로 로그인한 경우에는 `~/.config/gh/hosts.yml` / 키체인의 `gh:github.com` 항목도 자동으로 폴백 사용합니다.
 
 ### 키체인 접근 허용 (Claude 모드, 비밀번호 2번 입력)
 
