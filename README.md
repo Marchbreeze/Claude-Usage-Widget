@@ -1,4 +1,4 @@
-# Claude Usage Widget
+# AI Usage Widget
 🙏
 macOS 메뉴바에서 **Claude** 와 **GitHub Copilot** 사용량을 실시간으로 확인하는 경량 앱입니다.  
 아이콘 + 진행 막대 + 퍼센트로 한눈에 현황을 파악할 수 있습니다.  
