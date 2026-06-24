@@ -20,23 +20,37 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         let restored = SnapshotCache.load()
         snapshot = restored
-        hosting = NSHostingView(rootView: StatusBarView(model: StatusBarModel(percent: restored?.percent, isStale: restored != nil)))
+        let initialProvider = settings.provider
+        hosting = NSHostingView(rootView: StatusBarView(model: StatusBarModel(percent: restored?.percent, provider: initialProvider, isStale: restored != nil)))
         super.init()
         statusItem.button?.addSubview(hosting)
         resizeToFit()
         menu.autoenablesItems = false
         menu.delegate = self
         statusItem.menu = menu
+        provider = Self.makeProvider(settings.provider)
         startPolling()
     }
 
     func restartPolling() {
         pollTask?.cancel()
         consecutiveFailures = 0
+        provider = Self.makeProvider(settings.provider)
+        // The previous provider's snapshot doesn't apply to the new source.
+        snapshot = nil
+        lastError = nil
+        render(percent: nil, isStale: false)
         startPolling()
     }
 
-    private let provider: UsageProvider = SubscriptionProvider()
+    private var provider: UsageProvider = SubscriptionProvider()
+
+    private static func makeProvider(_ kind: ProviderKind) -> UsageProvider {
+        switch kind {
+        case .claude: return SubscriptionProvider()
+        case .copilot: return CopilotProvider()
+        }
+    }
 
     private func startPolling() {
         pollTask = Task { [weak self] in
@@ -74,7 +88,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     }
 
     private func render(percent: Double?, isStale: Bool) {
-        hosting.rootView = StatusBarView(model: StatusBarModel(percent: percent, isStale: isStale))
+        hosting.rootView = StatusBarView(model: StatusBarModel(percent: percent, provider: settings.provider, isStale: isStale))
         resizeToFit()
     }
 
@@ -88,6 +102,27 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.removeAllItems()
         menu.autoenablesItems = false
         if let snap = snapshot {
+            if let cop = snap.copilot {
+                if cop.unlimited {
+                    menu.addItem(label: "Premium 요청: 무제한")
+                } else if let remaining = cop.remaining, let entitlement = cop.entitlement {
+                    let used = Int((entitlement - remaining).rounded())
+                    menu.addItem(label: "Premium 요청: \(used) / \(Int(entitlement.rounded())) (\(Int(cop.premiumPercent.rounded()))%)")
+                } else {
+                    menu.addItem(label: "Premium 요청: \(Int(cop.premiumPercent.rounded()))% 사용")
+                }
+                if let overage = cop.overageCount, overage > 0 {
+                    menu.addItem(label: "초과 사용: \(Int(overage.rounded()))건")
+                }
+                if let reset = cop.resetsAt {
+                    let when = MonthlyReset.monthDayUTC(reset)
+                    let remaining = RelativeTime.until(reset).map { " · \($0)" } ?? ""
+                    menu.addItem(label: "월 리셋: \(when)\(remaining)")
+                }
+                if let plan = cop.plan {
+                    menu.addItem(label: "플랜: \(plan)")
+                }
+            }
             if let sub = snap.subscription {
                 if let five = sub.fiveHourPercent {
                     menu.addItem(label: "5시간 세션: \(Int(five.rounded()))% 사용" + countdown(sub.fiveHourResetsAt))

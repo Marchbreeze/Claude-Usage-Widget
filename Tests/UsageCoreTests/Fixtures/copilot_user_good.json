@@ -1,0 +1,18 @@
+{
+  "copilot_plan": "individual",
+  "chat_enabled": true,
+  "quota_reset_date": "2026-07-01",
+  "quota_snapshots": {
+    "chat": { "unlimited": true, "remaining": 0, "entitlement": 0, "percent_remaining": 100.0 },
+    "completions": { "unlimited": true, "remaining": 0, "entitlement": 0, "percent_remaining": 100.0 },
+    "premium_interactions": {
+      "entitlement": 300,
+      "remaining": 211,
+      "unlimited": false,
+      "percent_remaining": 70.33,
+      "overage_count": 0,
+      "overage_permitted": false,
+      "quota_id": "premium_interactions"
+    }
+  }
+}

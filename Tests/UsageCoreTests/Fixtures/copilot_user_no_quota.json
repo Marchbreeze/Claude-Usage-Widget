@@ -1,0 +1,6 @@
+{
+  "copilot_plan": "free",
+  "quota_snapshots": {
+    "chat": { "unlimited": false, "remaining": 50, "entitlement": 50, "percent_remaining": 100.0 }
+  }
+}

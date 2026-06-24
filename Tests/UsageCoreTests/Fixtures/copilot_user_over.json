@@ -1,0 +1,15 @@
+{
+  "copilot_plan": "individual",
+  "quota_snapshots": {
+    "premium_interactions": {
+      "entitlement": 300,
+      "remaining": 12,
+      "unlimited": false,
+      "percent_remaining": 4.0,
+      "overage_count": 5,
+      "overage_permitted": true,
+      "quota_id": "premium_interactions",
+      "resets_at": "2026-07-01T00:00:00Z"
+    }
+  }
+}
