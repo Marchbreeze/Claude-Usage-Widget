@@ -59,12 +59,12 @@ Claude Code의 OAuth 세션을 읽어 **5시간 세션 사용률**을 표시합�
 
 ### GitHub Copilot
 
-GitHub CLI(`gh`)의 로그인 토큰을 읽어 이번 달 **premium request 사용률**(사용량 / 월 한도)을 표시합니다. 메뉴를 펼치면 사용/한도, 초과 사용 건수, 월 리셋일, 플랜이 함께 표시됩니다.
+[GitHub Copilot CLI](https://github.com/github/copilot-cli)의 로그인 세션을 읽어 이번 달 **premium request 사용률**(사용량 / 월 한도)을 표시합니다. 메뉴를 펼치면 사용/한도, 초과 사용 건수, 월 리셋일, 플랜이 함께 표시됩니다.
 
 **요구사항**
 
-- [GitHub CLI](https://cli.github.com) 설치 후 `gh auth login` 으로 로그인되어 있어야 합니다.
-- 사용량 조회가 거부되면(로그인 필요 표시) 스코프를 갱신하세요: `gh auth refresh -h github.com -s user`
+- Copilot CLI에서 `/login`(device flow)으로 로그인되어 있어야 합니다. Claude와 마찬가지로 별도 설정 없이 자동으로 동작합니다.
+- 토큰은 Copilot CLI가 저장한 위치(`~/.copilot/settings.json` 등)에서 읽으며, `gh auth login`으로 로그인한 경우에는 `~/.config/gh/hosts.yml`도 자동으로 사용합니다.
 
 ### 키체인 접근 허용 (Claude 모드, 비밀번호 2번 입력)
 

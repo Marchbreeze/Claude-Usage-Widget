@@ -24,9 +24,9 @@ struct SettingsView: View {
                 .font(.caption).foregroundColor(.secondary)
             } else {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("GitHub CLI(gh)에 로그인되어 있으면 Copilot 사용량이 표시됩니다.")
+                    Text("Copilot CLI에 로그인되어 있으면 사용량이 자동으로 표시됩니다.")
                     Text("• 이번 달 premium request 사용률")
-                    Text("• 로그인이 필요하면 터미널에서 gh auth login")
+                    Text("• 로그인이 필요하면 터미널에서 copilot 실행 후 /login")
                 }
                 .font(.caption).foregroundColor(.secondary)
             }
