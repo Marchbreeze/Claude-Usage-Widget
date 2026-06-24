@@ -29,6 +29,19 @@ final class CopilotUsageParserTests: XCTestCase {
         XCTAssertNotNil(d.resetsAt)
     }
 
+    func testExhaustedQuotaClampsTo100AndParsesOverageEntitlement() throws {
+        let d = try CopilotUsageParser.parse(try fixture("copilot_user_exhausted_overage"))
+        // remaining is negative -> used clamps to 100%
+        XCTAssertEqual(d.premiumPercent, 100, accuracy: 0.001)
+        XCTAssertEqual(d.remaining, -18)
+        XCTAssertEqual(d.overageCount, 17)
+        XCTAssertEqual(d.overageEntitlement, 1000)
+        XCTAssertTrue(d.overagePermitted)
+        // The parser leaves dollar fields to the provider.
+        XCTAssertNil(d.overageSpendUSD)
+        XCTAssertFalse(d.isInOverage)
+    }
+
     func testMissingPremiumQuotaThrows() {
         XCTAssertThrowsError(try CopilotUsageParser.parse(try! fixture("copilot_user_no_quota"))) { error in
             XCTAssertEqual(error as? CopilotUsageError, .missingQuota)

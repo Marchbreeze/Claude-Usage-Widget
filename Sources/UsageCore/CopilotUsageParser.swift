@@ -22,6 +22,7 @@ public enum CopilotUsageParser {
         let entitlement = doubleValue(premium["entitlement"])
         let percentRemaining = doubleValue(premium["percent_remaining"])
         let overageCount = doubleValue(premium["overage_count"])
+        let overageEntitlement = doubleValue(premium["overage_entitlement"])
         let overagePermitted = (premium["overage_permitted"] as? Bool) ?? false
 
         let usedPercent: Double
@@ -43,6 +44,7 @@ public enum CopilotUsageParser {
             entitlement: entitlement,
             unlimited: unlimited,
             overageCount: overageCount,
+            overageEntitlement: overageEntitlement,
             overagePermitted: overagePermitted,
             resetsAt: resets
         )

@@ -28,14 +28,14 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.autoenablesItems = false
         menu.delegate = self
         statusItem.menu = menu
-        provider = Self.makeProvider(settings.provider)
+        provider = Self.makeProvider(settings)
         startPolling()
     }
 
     func restartPolling() {
         pollTask?.cancel()
         consecutiveFailures = 0
-        provider = Self.makeProvider(settings.provider)
+        provider = Self.makeProvider(settings)
         // The previous provider's snapshot doesn't apply to the new source.
         snapshot = nil
         lastError = nil
@@ -45,10 +45,10 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
     private var provider: UsageProvider = SubscriptionProvider()
 
-    private static func makeProvider(_ kind: ProviderKind) -> UsageProvider {
-        switch kind {
+    private static func makeProvider(_ settings: SettingsStore) -> UsageProvider {
+        switch settings.provider {
         case .claude: return SubscriptionProvider()
-        case .copilot: return CopilotProvider()
+        case .copilot: return CopilotProvider(overageBudgetUSD: settings.copilotOverageBudgetUSD)
         }
     }
 
@@ -111,7 +111,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 } else {
                     menu.addItem(label: "Premium 요청: \(Int(cop.premiumPercent.rounded()))% 사용")
                 }
-                if let overage = cop.overageCount, overage > 0 {
+                if let spend = cop.overageSpendUSD, let budget = cop.overageBudgetUSD {
+                    let pct = budget > 0 ? Int((spend / budget * 100).rounded()) : 0
+                    menu.addItem(label: String(format: "추가 사용량: $%.2f / $%.0f (%d%%)", spend, budget, pct))
+                    if let count = cop.overageCount {
+                        menu.addItem(label: "초과 요청: \(Int(count.rounded()))건")
+                    }
+                } else if let overage = cop.overageCount, overage > 0 {
                     menu.addItem(label: "초과 사용: \(Int(overage.rounded()))건")
                 }
                 if let reset = cop.resetsAt {

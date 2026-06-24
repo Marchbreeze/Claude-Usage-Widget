@@ -1,0 +1,19 @@
+{
+  "login": "Marchbreeze",
+  "copilot_plan": "individual_pro",
+  "quota_reset_date": "2026-07-01",
+  "quota_snapshots": {
+    "premium_interactions": {
+      "overage_count": 17,
+      "overage_entitlement": 1000,
+      "overage_permitted": true,
+      "percent_remaining": 0.0,
+      "quota_id": "premium_interactions",
+      "quota_remaining": -17.4,
+      "unlimited": false,
+      "token_based_billing": true,
+      "remaining": -18,
+      "entitlement": 7000
+    }
+  }
+}

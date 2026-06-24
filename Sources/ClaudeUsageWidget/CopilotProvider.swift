@@ -3,12 +3,27 @@ import UsageCore
 
 /// Reads GitHub Copilot premium-request usage from `/copilot_internal/user` — the
 /// same endpoint the official IDE extensions use — authenticated with the token
-/// from the user's `gh auth login` session.
+/// from the user's Copilot CLI `/login` (or `gh`) session.
 final class CopilotProvider: UsageProvider {
     let pollInterval: TimeInterval = 60
 
+    /// GitHub bills premium requests over the included allowance at this flat
+    /// rate on every paid plan.
+    static let overagePricePerRequestUSD = 0.04
+
+    /// The user's additional-usage (overage) budget cap in USD.
+    private let overageBudgetUSD: Double
+    /// Cache the token so we don't hit the keychain on every poll (which would
+    /// re-trigger the macOS access prompt). Cleared on auth failure.
+    private var cachedToken: String?
+
+    init(overageBudgetUSD: Double) {
+        self.overageBudgetUSD = overageBudgetUSD
+    }
+
     func fetch() async throws -> UsageSnapshot {
-        guard let token = GHTokenReader.read() else { throw FetchError.needsGitHubLogin }
+        let token = cachedToken ?? GHTokenReader.read()
+        guard let token else { throw FetchError.needsGitHubLogin }
 
         var req = URLRequest(url: URL(string: "https://api.github.com/copilot_internal/user")!)
         req.setValue("token \(token)", forHTTPHeaderField: "Authorization")
@@ -20,10 +35,41 @@ final class CopilotProvider: UsageProvider {
 
         let (data, resp) = try await URLSession.shared.data(for: req)
         guard let http = resp as? HTTPURLResponse else { throw FetchError.network("응답 없음") }
-        if http.statusCode == 401 || http.statusCode == 403 { throw FetchError.needsGitHubLogin }
+        if http.statusCode == 401 || http.statusCode == 403 {
+            cachedToken = nil
+            throw FetchError.needsGitHubLogin
+        }
         guard http.statusCode == 200 else { throw FetchError.network("HTTP \(http.statusCode)") }
-        guard let detail = try? CopilotUsageParser.parse(data) else { throw FetchError.network("응답 형식 오류") }
+        guard let parsed = try? CopilotUsageParser.parse(data) else { throw FetchError.network("응답 형식 오류") }
+        cachedToken = token
 
-        return UsageSnapshot(percent: detail.premiumPercent, provider: .copilot, copilot: detail, fetchedAt: Date())
+        let (detail, percent) = applyOverage(parsed)
+        return UsageSnapshot(percent: percent, provider: .copilot, copilot: detail, fetchedAt: Date())
+    }
+
+    /// Once the included quota is exhausted and paid overage is active, switch the
+    /// displayed figure to additional-usage spend ($ used / $ budget). Otherwise
+    /// keep showing premium-request usage as a percent of the allowance.
+    private func applyOverage(_ d: CopilotDetail) -> (CopilotDetail, Double) {
+        let exhausted = d.premiumPercent >= 100 || (d.remaining ?? 1) <= 0
+        guard exhausted, d.overagePermitted, overageBudgetUSD > 0, let count = d.overageCount, count > 0 else {
+            return (d, d.premiumPercent)
+        }
+        let spend = count * Self.overagePricePerRequestUSD
+        let percent = PercentMath.clamp(spend / overageBudgetUSD * 100)
+        let detail = CopilotDetail(
+            plan: d.plan,
+            premiumPercent: d.premiumPercent,
+            remaining: d.remaining,
+            entitlement: d.entitlement,
+            unlimited: d.unlimited,
+            overageCount: d.overageCount,
+            overageEntitlement: d.overageEntitlement,
+            overagePermitted: d.overagePermitted,
+            resetsAt: d.resetsAt,
+            overageSpendUSD: spend,
+            overageBudgetUSD: overageBudgetUSD
+        )
+        return (detail, percent)
     }
 }

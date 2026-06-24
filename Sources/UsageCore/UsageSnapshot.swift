@@ -15,18 +15,30 @@ public struct CopilotDetail: Codable, Equatable {
     public let entitlement: Double?
     public let unlimited: Bool
     public let overageCount: Double?
+    public let overageEntitlement: Double?
     public let overagePermitted: Bool
     public let resetsAt: Date?
-    public init(plan: String?, premiumPercent: Double, remaining: Double?, entitlement: Double?, unlimited: Bool, overageCount: Double?, overagePermitted: Bool, resetsAt: Date?) {
+    /// Overage spend in USD (overageCount × per-request price), filled in by the
+    /// provider once the included quota is exhausted; nil otherwise.
+    public let overageSpendUSD: Double?
+    /// User-configured additional-usage budget in USD (the $ cap).
+    public let overageBudgetUSD: Double?
+    public init(plan: String?, premiumPercent: Double, remaining: Double?, entitlement: Double?, unlimited: Bool, overageCount: Double?, overageEntitlement: Double? = nil, overagePermitted: Bool, resetsAt: Date?, overageSpendUSD: Double? = nil, overageBudgetUSD: Double? = nil) {
         self.plan = plan
         self.premiumPercent = premiumPercent
         self.remaining = remaining
         self.entitlement = entitlement
         self.unlimited = unlimited
         self.overageCount = overageCount
+        self.overageEntitlement = overageEntitlement
         self.overagePermitted = overagePermitted
         self.resetsAt = resetsAt
+        self.overageSpendUSD = overageSpendUSD
+        self.overageBudgetUSD = overageBudgetUSD
     }
+
+    /// True once the included quota is spent and paid overage is active.
+    public var isInOverage: Bool { overageSpendUSD != nil }
 }
 
 public struct ExtraUsage: Codable, Equatable {

@@ -26,9 +26,15 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Copilot CLI에 로그인되어 있으면 사용량이 자동으로 표시됩니다.")
                     Text("• 이번 달 premium request 사용률")
+                    Text("• 100% 소진 시 추가 사용량($ 사용 / $ 한도)으로 전환")
                     Text("• 로그인이 필요하면 터미널에서 copilot 실행 후 /login")
                 }
                 .font(.caption).foregroundColor(.secondary)
+
+                Stepper(value: $settings.copilotOverageBudgetUSD, in: 0...500, step: 1) {
+                    Text("추가 사용량 한도: $\(Int(settings.copilotOverageBudgetUSD))")
+                }
+                .onChange(of: settings.copilotOverageBudgetUSD) { _ in onChange() }
             }
 
             Toggle("로그인 시 자동 실행", isOn: $settings.launchAtLogin)
