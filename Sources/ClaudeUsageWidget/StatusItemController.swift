@@ -111,14 +111,25 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 } else {
                     menu.addItem(label: "Premium 요청: \(Int(cop.premiumPercent.rounded()))% 사용")
                 }
-                if let spend = cop.overageSpendUSD, let budget = cop.overageBudgetUSD {
-                    let pct = budget > 0 ? Int((spend / budget * 100).rounded()) : 0
-                    menu.addItem(label: String(format: "추가 사용량: $%.2f / $%.0f (%d%%)", spend, budget, pct))
-                    if let count = cop.overageCount {
-                        menu.addItem(label: "초과 요청: \(Int(count.rounded()))건")
+                if !cop.unlimited {
+                    if let spend = cop.overageSpendUSD, let budget = cop.overageBudgetUSD {
+                        let pct = budget > 0 ? Int((spend / budget * 100).rounded()) : 0
+                        menu.addItem(label: String(format: "추가 사용량: $%.2f / $%.0f (%d%%)", spend, budget, pct))
+                        if let count = cop.overageCount, count > 0 {
+                            menu.addItem(label: "초과 요청: \(Int(count.rounded()))건")
+                        }
+                    } else if cop.overagePermitted {
+                        if let budget = cop.overageBudgetUSD {
+                            menu.addItem(label: "추가 사용량: 허용됨 · 한도 $\(Int(budget))")
+                        } else {
+                            menu.addItem(label: "추가 사용량: 허용됨")
+                        }
+                        if let count = cop.overageCount, count > 0 {
+                            menu.addItem(label: "초과 요청: \(Int(count.rounded()))건")
+                        }
+                    } else {
+                        menu.addItem(label: "추가 사용량: 차단됨")
                     }
-                } else if let overage = cop.overageCount, overage > 0 {
-                    menu.addItem(label: "초과 사용: \(Int(overage.rounded()))건")
                 }
                 if let reset = cop.resetsAt {
                     let when = MonthlyReset.monthDayUTC(reset)

@@ -52,11 +52,11 @@ final class CopilotProvider: UsageProvider {
     /// keep showing premium-request usage as a percent of the allowance.
     private func applyOverage(_ d: CopilotDetail) -> (CopilotDetail, Double) {
         let exhausted = d.premiumPercent >= 100 || (d.remaining ?? 1) <= 0
-        guard exhausted, d.overagePermitted, overageBudgetUSD > 0, let count = d.overageCount, count > 0 else {
-            return (d, d.premiumPercent)
-        }
-        let spend = count * Self.overagePricePerRequestUSD
-        let percent = PercentMath.clamp(spend / overageBudgetUSD * 100)
+        // Once the included quota is exhausted AND paid overage is permitted, move
+        // to the additional-usage stage (the $ meter starts at $0, even before the
+        // first overage request). If overage is not permitted, stay pinned at 100%.
+        let inOverage = exhausted && d.overagePermitted && overageBudgetUSD > 0
+        let spend: Double? = inOverage ? (d.overageCount ?? 0) * Self.overagePricePerRequestUSD : nil
         let detail = CopilotDetail(
             plan: d.plan,
             premiumPercent: d.premiumPercent,
@@ -68,8 +68,9 @@ final class CopilotProvider: UsageProvider {
             overagePermitted: d.overagePermitted,
             resetsAt: d.resetsAt,
             overageSpendUSD: spend,
-            overageBudgetUSD: overageBudgetUSD
+            overageBudgetUSD: overageBudgetUSD > 0 ? overageBudgetUSD : nil
         )
+        let percent = spend.map { PercentMath.clamp($0 / overageBudgetUSD * 100) } ?? d.premiumPercent
         return (detail, percent)
     }
 }
