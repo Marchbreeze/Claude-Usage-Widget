@@ -47,16 +47,18 @@ final class CopilotProvider: UsageProvider {
         return UsageSnapshot(percent: percent, provider: .copilot, copilot: detail, fetchedAt: Date())
     }
 
-    /// Once the included quota is exhausted and paid overage is active, switch the
-    /// displayed figure to additional-usage spend ($ used / $ budget). Otherwise
-    /// keep showing premium-request usage as a percent of the allowance.
+    /// Once the included quota is exhausted and paid overage is permitted, switch
+    /// to the additional-usage stage. The gauge comes from the API allowance ratio
+    /// (`overage_count / overage_entitlement`) and needs no dollar budget; the
+    /// budget, if set, only adds a "$ used / $ budget" label. Otherwise keep showing
+    /// premium-request usage as a percent of the allowance.
     private func applyOverage(_ d: CopilotDetail) -> (CopilotDetail, Double) {
         let exhausted = d.premiumPercent >= 100 || (d.remaining ?? 1) <= 0
-        // Once the included quota is exhausted AND paid overage is permitted, move
-        // to the additional-usage stage (the $ meter starts at $0, even before the
-        // first overage request). If overage is not permitted, stay pinned at 100%.
-        let inOverage = exhausted && d.overagePermitted && overageBudgetUSD > 0
-        let spend: Double? = inOverage ? overageSpend(d) : nil
+        guard exhausted, d.overagePermitted, let fraction = overageFraction(d) else {
+            return (d, d.premiumPercent)
+        }
+        let percent = PercentMath.clamp(fraction * 100)
+        let spend: Double? = overageBudgetUSD > 0 ? fraction * overageBudgetUSD : nil
         let detail = CopilotDetail(
             plan: d.plan,
             premiumPercent: d.premiumPercent,
@@ -67,23 +69,25 @@ final class CopilotProvider: UsageProvider {
             overageEntitlement: d.overageEntitlement,
             overagePermitted: d.overagePermitted,
             resetsAt: d.resetsAt,
+            overagePercent: percent,
             overageSpendUSD: spend,
             overageBudgetUSD: overageBudgetUSD > 0 ? overageBudgetUSD : nil
         )
-        let percent = spend.map { PercentMath.clamp($0 / overageBudgetUSD * 100) } ?? d.premiumPercent
         return (detail, percent)
     }
 
-    /// Additional-usage spend in USD. For token-based-billing accounts the flat
-    /// $0.04/request rate doesn't apply; instead `overage_entitlement` is the unit
-    /// cap that maps to the dollar budget (e.g. 1000 units ↔ $10), so spend tracks
-    /// `overage_count / overage_entitlement × budget`. Falls back to the flat rate
-    /// when no entitlement is reported.
-    private func overageSpend(_ d: CopilotDetail) -> Double {
+    /// Fraction (0…1) of the additional-usage allowance consumed. Prefer the API's
+    /// `overage_entitlement` (the unit cap, which maps to the user's dollar budget
+    /// regardless of token-based vs flat billing); fall back to the flat
+    /// $0.04/request rate against the configured budget when no entitlement exists.
+    private func overageFraction(_ d: CopilotDetail) -> Double? {
         let count = d.overageCount ?? 0
         if let entitlement = d.overageEntitlement, entitlement > 0 {
-            return count / entitlement * overageBudgetUSD
+            return count / entitlement
         }
-        return count * Self.overagePricePerRequestUSD
+        if overageBudgetUSD > 0 {
+            return count * Self.overagePricePerRequestUSD / overageBudgetUSD
+        }
+        return nil
     }
 }

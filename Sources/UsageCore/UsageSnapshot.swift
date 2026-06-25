@@ -18,12 +18,16 @@ public struct CopilotDetail: Codable, Equatable {
     public let overageEntitlement: Double?
     public let overagePermitted: Bool
     public let resetsAt: Date?
-    /// Overage spend in USD (overageCount × per-request price), filled in by the
-    /// provider once the included quota is exhausted; nil otherwise.
+    /// Additional-usage consumed as a percent of the overage allowance
+    /// (overageCount / overageEntitlement). Filled in by the provider once the
+    /// included quota is exhausted and overage is active; nil otherwise. This is
+    /// budget-independent — it drives the gauge without needing a dollar amount.
+    public let overagePercent: Double?
+    /// Overage spend in USD, shown only when a dollar budget is configured.
     public let overageSpendUSD: Double?
-    /// User-configured additional-usage budget in USD (the $ cap).
+    /// Configured additional-usage budget in USD (the optional $ label).
     public let overageBudgetUSD: Double?
-    public init(plan: String?, premiumPercent: Double, remaining: Double?, entitlement: Double?, unlimited: Bool, overageCount: Double?, overageEntitlement: Double? = nil, overagePermitted: Bool, resetsAt: Date?, overageSpendUSD: Double? = nil, overageBudgetUSD: Double? = nil) {
+    public init(plan: String?, premiumPercent: Double, remaining: Double?, entitlement: Double?, unlimited: Bool, overageCount: Double?, overageEntitlement: Double? = nil, overagePermitted: Bool, resetsAt: Date?, overagePercent: Double? = nil, overageSpendUSD: Double? = nil, overageBudgetUSD: Double? = nil) {
         self.plan = plan
         self.premiumPercent = premiumPercent
         self.remaining = remaining
@@ -33,12 +37,13 @@ public struct CopilotDetail: Codable, Equatable {
         self.overageEntitlement = overageEntitlement
         self.overagePermitted = overagePermitted
         self.resetsAt = resetsAt
+        self.overagePercent = overagePercent
         self.overageSpendUSD = overageSpendUSD
         self.overageBudgetUSD = overageBudgetUSD
     }
 
     /// True once the included quota is spent and paid overage is active.
-    public var isInOverage: Bool { overageSpendUSD != nil }
+    public var isInOverage: Bool { overagePercent != nil }
 }
 
 public struct ExtraUsage: Codable, Equatable {

@@ -112,21 +112,19 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                     menu.addItem(label: "Premium 요청: \(Int(cop.premiumPercent.rounded()))% 사용")
                 }
                 if !cop.unlimited {
-                    if let spend = cop.overageSpendUSD, let budget = cop.overageBudgetUSD {
-                        let pct = budget > 0 ? Int((spend / budget * 100).rounded()) : 0
-                        menu.addItem(label: String(format: "추가 사용량: $%.2f / $%.0f (%d%%)", spend, budget, pct))
-                        if let count = cop.overageCount, count > 0 {
+                    if let opct = cop.overagePercent {
+                        if let spend = cop.overageSpendUSD, let budget = cop.overageBudgetUSD {
+                            menu.addItem(label: String(format: "추가 사용량: $%.2f / $%.0f (%d%%)", spend, budget, Int(opct.rounded())))
+                        } else {
+                            menu.addItem(label: "추가 사용량: \(Int(opct.rounded()))%")
+                        }
+                        if let count = cop.overageCount, let ent = cop.overageEntitlement, ent > 0 {
+                            menu.addItem(label: "초과 요청: \(Int(count.rounded())) / \(Int(ent.rounded()))")
+                        } else if let count = cop.overageCount, count > 0 {
                             menu.addItem(label: "초과 요청: \(Int(count.rounded()))건")
                         }
                     } else if cop.overagePermitted {
-                        if let budget = cop.overageBudgetUSD {
-                            menu.addItem(label: "추가 사용량: 허용됨 · 한도 $\(Int(budget))")
-                        } else {
-                            menu.addItem(label: "추가 사용량: 허용됨")
-                        }
-                        if let count = cop.overageCount, count > 0 {
-                            menu.addItem(label: "초과 요청: \(Int(count.rounded()))건")
-                        }
+                        menu.addItem(label: "추가 사용량: 허용됨")
                     } else {
                         menu.addItem(label: "추가 사용량: 차단됨")
                     }
