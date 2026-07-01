@@ -5,6 +5,7 @@ struct StatusBarModel {
     var percent: Double?
     var provider: ProviderKind = .claude
     var isStale: Bool = false
+    var percentDecimals: Int = 1
 }
 
 struct StatusBarView: View {
@@ -39,7 +40,7 @@ struct StatusBarView: View {
                 }
             }
             .frame(width: 48, height: 6)
-            Text(model.percent.map { "\(Int($0.rounded()))%" } ?? "—")
+            Text(model.percent.map { String(format: "%.\(max(0, model.percentDecimals))f%%", $0) } ?? "—")
                 .font(.system(size: 12, weight: .semibold).monospacedDigit())
                 .foregroundColor(color)
                 .opacity(model.isStale ? 0.55 : 1)

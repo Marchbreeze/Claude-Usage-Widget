@@ -34,8 +34,9 @@ final class OAuthUsageParserTests: XCTestCase {
         XCTAssertNil(d.sevenDayPercent)        // seven_day is null
         let extra = try XCTUnwrap(d.extraUsage)
         XCTAssertEqual(extra.percent, 100)     // 20026/20000 clamped to 100
-        XCTAssertEqual(extra.usedUSD, 20026)
-        XCTAssertEqual(extra.limitUSD, 20000)
+        // used_credits / monthly_limit are cents; exposed as dollars.
+        XCTAssertEqual(extra.usedUSD, 200.26)
+        XCTAssertEqual(extra.limitUSD, 200)
         // No server resets_at -> falls back to start of next calendar month (future).
         let reset = try XCTUnwrap(extra.resetsAt)
         XCTAssertGreaterThan(reset, Date())

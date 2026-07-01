@@ -24,9 +24,11 @@ public enum OAuthUsageParser {
 
     private static func extraUsage(_ value: Any?) -> ExtraUsage? {
         guard let dict = value as? [String: Any], (dict["is_enabled"] as? Bool) == true else { return nil }
+        // used_credits / monthly_limit are reported in cents (e.g. 200 = $2.00).
         let used = doubleValue(dict["used_credits"])
         let limit = doubleValue(dict["monthly_limit"])
         // Prefer used/limit (the user-facing burn); fall back to the server's utilization field.
+        // The ratio is unaffected by the cents→dollars conversion below.
         let percent: Double?
         if let used, let limit { percent = PercentMath.budgetPercent(spend: used, budget: limit) }
         else { percent = doubleValue(dict["utilization"]).map(PercentMath.clamp) }
@@ -35,7 +37,7 @@ public enum OAuthUsageParser {
         // resets_at; otherwise fall back to the start of the next calendar month (UTC).
         let resets = (dict["resets_at"] as? String).flatMap(ISODate.parse)
             ?? MonthlyReset.startOfNextMonthUTC()
-        return ExtraUsage(percent: percent, usedUSD: used, limitUSD: limit, resetsAt: resets)
+        return ExtraUsage(percent: percent, usedUSD: used.map { $0 / 100 }, limitUSD: limit.map { $0 / 100 }, resetsAt: resets)
     }
 
     private static func window(_ value: Any?) -> (Double, Date?)? {

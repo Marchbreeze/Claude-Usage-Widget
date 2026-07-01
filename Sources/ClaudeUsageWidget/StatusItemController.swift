@@ -14,6 +14,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     private var consecutiveFailures = 0
     private var pollTask: Task<Void, Never>?
     private var settingsWindow: SettingsWindowController?
+    private var lastStale = false
 
     init(settings: SettingsStore) {
         self.settings = settings
@@ -21,7 +22,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let restored = SnapshotCache.load()
         snapshot = restored
         let initialProvider = settings.provider
-        hosting = NSHostingView(rootView: StatusBarView(model: StatusBarModel(percent: restored?.percent, provider: initialProvider, isStale: restored != nil)))
+        hosting = NSHostingView(rootView: StatusBarView(model: StatusBarModel(percent: restored?.percent, provider: initialProvider, isStale: restored != nil, percentDecimals: settings.percentDecimals)))
         super.init()
         statusItem.button?.addSubview(hosting)
         resizeToFit()
@@ -87,8 +88,15 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         }
     }
 
+    /// Re-render from the current snapshot without refetching. Used for display-only
+    /// settings changes (e.g. percent decimals) so the bar updates without a flash.
+    func refreshDisplay() {
+        render(percent: snapshot?.percent, isStale: lastStale)
+    }
+
     private func render(percent: Double?, isStale: Bool) {
-        hosting.rootView = StatusBarView(model: StatusBarModel(percent: percent, provider: settings.provider, isStale: isStale))
+        lastStale = isStale
+        hosting.rootView = StatusBarView(model: StatusBarModel(percent: percent, provider: settings.provider, isStale: isStale, percentDecimals: settings.percentDecimals))
         resizeToFit()
     }
 
@@ -147,7 +155,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
                 }
                 if let extra = sub.extraUsage {
                     if let used = extra.usedUSD, let limit = extra.limitUSD {
-                        menu.addItem(label: String(format: "추가 사용량: $%.0f / $%.0f (%d%%)", used, limit, Int(extra.percent.rounded())))
+                        menu.addItem(label: String(format: "추가 사용량: $%.2f / $%.2f (%d%%)", used, limit, Int(extra.percent.rounded())))
                     } else {
                         menu.addItem(label: "추가 사용량: \(Int(extra.percent.rounded()))% 사용")
                     }
@@ -172,9 +180,15 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(.separator())
         menu.addItem(withTitle: "지금 새로고침", action: #selector(refreshNow), keyEquivalent: "r").target = self
         menu.addItem(withTitle: "설정…", action: #selector(openSettings), keyEquivalent: ",").target = self
+        menu.addItem(withTitle: "업데이트 확인하기 (현재 v\(Self.appVersion))", action: #selector(openReleases), keyEquivalent: "").target = self
         menu.addItem(.separator())
         menu.addItem(withTitle: "종료", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
     }
+
+    private static let appVersion = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "1.0.3"
+    private static let releasesURL = URL(string: "https://github.com/Marchbreeze/Claude-Usage-Widget/releases")!
+
+    @objc private func openReleases() { NSWorkspace.shared.open(Self.releasesURL) }
 
     private func countdown(_ date: Date?) -> String {
         guard let date, let remaining = RelativeTime.until(date) else { return "" }
@@ -184,7 +198,13 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     @objc private func refreshNow() { Task { await tick() } }
 
     @objc private func openSettings() {
-        if settingsWindow == nil { settingsWindow = SettingsWindowController(settings: settings, onChange: { [weak self] in self?.restartPolling() }) }
+        if settingsWindow == nil {
+            settingsWindow = SettingsWindowController(
+                settings: settings,
+                onChange: { [weak self] in self?.restartPolling() },
+                onDisplayChange: { [weak self] in self?.refreshDisplay() }
+            )
+        }
         settingsWindow?.show()
     }
 }
