@@ -19,6 +19,25 @@ enum KeychainReader {
         return data
     }
 
+    /// Update the value of the existing item in place, preserving its other
+    /// attributes (notably the account, e.g. "sangho") so the Claude Code CLI keeps
+    /// finding the same item after we rotate the token. Falls back to `write` only if
+    /// the item somehow doesn't exist yet.
+    @discardableResult
+    static func update(service: String, data: Data) -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+        ]
+        let attrs: [String: Any] = [kSecValueData as String: data]
+        let status = SecItemUpdate(query as CFDictionary, attrs as CFDictionary)
+        if status == errSecItemNotFound {
+            write(service: service, data: data)
+            return true
+        }
+        return status == errSecSuccess
+    }
+
     static func write(service: String, data: Data) {
         delete(service: service)
         let attrs: [String: Any] = [

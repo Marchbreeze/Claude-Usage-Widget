@@ -185,7 +185,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         menu.addItem(withTitle: "종료", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
     }
 
-    private static let appVersion = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "1.0.3"
+    private static let appVersion = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? "1.0.4"
     private static let releasesURL = URL(string: "https://github.com/Marchbreeze/Claude-Usage-Widget/releases")!
 
     @objc private func openReleases() { NSWorkspace.shared.open(Self.releasesURL) }
